@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2017-04-20T06:12:45.066Z</updated>
+  <updated>2017-04-20T13:23:43.428Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -14,6 +14,72 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>vertica安装过程中的版本问题</title>
+    <link href="http://yoursite.com/2017/04/20/vertica%E5%AE%89%E8%A3%85%E8%BF%87%E7%A8%8B%E4%B8%AD%E7%9A%84%E7%89%88%E6%9C%AC%E9%97%AE%E9%A2%98/"/>
+    <id>http://yoursite.com/2017/04/20/vertica安装过程中的版本问题/</id>
+    <published>2017-04-20T13:21:43.000Z</published>
+    <updated>2017-04-20T13:23:43.428Z</updated>
+    
+    <content type="html"><![CDATA[<p>vertica官网只提供最新版的Community版本的下载地址，vertica8.1.x只支持Centos 7.3及其以上版本。因此，要安装vertica必须满足操作系统版本与最新的vertica版本相匹配！</p>
+<p>即使你从别人那里拷了老的vertica版本也不能安装，安装过程中会检测到不是最新的vertica版本而不让安装。</p>
+<h1 id="安装前"><a href="#安装前" class="headerlink" title="安装前"></a>安装前</h1><h2 id="操作系统版本"><a href="#操作系统版本" class="headerlink" title="操作系统版本"></a>操作系统版本</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ cat /etc/redhat-release</div><div class="line"></div><div class="line">CentOS Linux release 7.2.1511 (Core)</div></pre></td></tr></table></figure>
+<h2 id="vertica安装包下载"><a href="#vertica安装包下载" class="headerlink" title="vertica安装包下载"></a>vertica安装包下载</h2><p>先注册myVertica账号，注册为Community User</p>
+<p>下载对应操作系统的vertica安装包，Community User只能下载免费的Community Edition。</p>
+<p>本文下载的vertica安装包为：<code>vertica-8.1.0-1.x86_64.RHEL6.rpm</code></p>
+<ul>
+<li><p>免费版本无限期支持1TB以下最多3个结点的数据管理和分析。如果你的数据大于1TB，结点数多于3个，那么请使用企业版。</p>
+</li>
+<li><blockquote>
+<p>The free Community Edition lets you manage and analyze up to 1 TB of data across three nodes for an unlimited time.</p>
+</blockquote>
+</li>
+</ul>
+<p>目前支持的操作系统平台包括如下三个：</p>
+<ol>
+<li>Red Hat Enterprise Linux 6 and 7</li>
+<li>SUSE Linux Enterprise Server 11</li>
+<li>Debian Linux 7 and Ubuntu 14.04 LTS</li>
+</ol>
+<p>scp到远程服务器上</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"># 假设要安装vertica服务的主机名为hostname，用户名为username，</div><div class="line">要存放vertica安装文件的路径为/home/username</div><div class="line"></div><div class="line">scp vertica-8.1.0-1.x86_64.RHEL6.rpm username@hostname:/home/username</div></pre></td></tr></table></figure>
+<p>接下来的安装操作都在远程服务器上进行，需要拥有root或sudo权限，本文使用sudo权限。</p>
+<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><p>安装vertica服务包</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ sudo rpm -Uvh vertica-8.1.0-1.x86_64.RHEL6.rpm</div><div class="line">错误：依赖检测失败：</div><div class="line">	dialog 被 vertica-8.1.0-1.x86_64 需要</div></pre></td></tr></table></figure>
+<p>centos上安装dialog</p>
+<p><code>sudo yum install dialog</code></p>
+<p>使用安装脚本安装vertica</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">#创建数据库用户dbadmin，如果使用root安装则可以省去最后一个参数，用sudo则不能省</div><div class="line">$ sudo /opt/vertica/sbin/install_vertica --hosts 127.0.0.1 --rpm vertica-8.1.0-1.x86_64.RHEL6.rpm --dba-user dbadmin</div></pre></td></tr></table></figure>
+<p>中间会让你输入dbadmin的密码：</p>
+<p><code>Password for new dbadmin user (empty = disabled)</code></p>
+<p>之后会检测系统环境与vertica版本，本文安装的vertica8.1.0版本与Centos7.2版本不匹配，因此安装中断，弹出如下错误（如下图所示）：</p>
+<p><img src="/home/zixing/Pictures/vertica_err1_1.png" alt="vertica版本与系统版本不符1"></p>
+<p>上图中的<code>HINT</code>提示可以不予处理，但是<code>FAIL</code>必须解决。</p>
+<p>第一个<code>FAIL</code>是swap分区大小不足，vertica要求2.00GB的swap分区，修改系统swap分区大小的方法见<a href="https://askubuntu.com/questions/178712/how-to-increase-swap-space" target="_blank" rel="external">这里</a>。</p>
+<p>第一个<code>FAIL</code>表示操作系统版本与vertica版本不匹配，提示使用Centos7.3或更新的版本。</p>
+<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>遇到这种问题通常有两种解决方法：</p>
+<ol>
+<li>降低vertica版本</li>
+<li>升级系统版本</li>
+</ol>
+<p>优先考虑降低vertica版本，然而官网上对于Community版本只提供了最新版的下载接口，Enterprise版本倒提供了多种历史版本。</p>
+<p>咨询安装过vertiva的同学，从他们那里拷了可以安装在Centos 7.2版本上的vertica 7.2安装包，按照上述安装过程重新进行安装。然而到版本检测这一环节又提示（如下图所示），所使用的vertica RPM包不是最新版本，必须先进行升级。</p>
+<p><img src="/home/zixing/Pictures/vertica_err1_2.png" alt="vertica版本与系统版本不符2"></p>
+<p>到目前真是没辙了，只能升级系统版本了。等待运维的小伙伴升级系统……</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;vertica官网只提供最新版的Community版本的下载地址，vertica8.1.x只支持Centos 7.3及其以上版本。因此，要安装vertica必须满足操作系统版本与最新的vertica版本相匹配！&lt;/p&gt;
+&lt;p&gt;即使你从别人那里拷了老的vertica版本也不能
+    
+    </summary>
+    
+    
+      <category term="vertica" scheme="http://yoursite.com/tags/vertica/"/>
+    
+  </entry>
   
   <entry>
     <title>世事洞明皆学问，人情练达即文章</title>
