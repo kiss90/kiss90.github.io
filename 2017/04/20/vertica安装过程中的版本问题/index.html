@@ -30,7 +30,7 @@
 <p>中间会让你输入dbadmin的密码：</p>
 <p><code>Password for new dbadmin user (empty = disabled)</code></p>
 <p>之后会检测系统环境与vertica版本，本文安装的vertica8.1.0版本与Centos7.2版本不匹配，因此安装中断，弹出如下错误（如下图所示）：</p>
-<p><img src="/home/zixing/Pictures/vertica_err1_1.png" alt="vertica版本与系统版本不符1"></p>
+<p><img src="../images/vertica_err1_1.png" alt="vertica版本与系统版本不符1"></p>
 <p>上图中的<code>HINT</code>提示可以不予处理，但是<code>FAIL</code>必须解决。</p>
 <p>第一个<code>FAIL</code>是swap分区大小不足，vertica要求2.00GB的swap分区，修改系统swap分区大小的方法见<a href="https://askubuntu.com/questions/178712/how-to-increase-swap-space" target="_blank" rel="external">这里</a>。</p>
 <p>第一个<code>FAIL</code>表示操作系统版本与vertica版本不匹配，提示使用Centos7.3或更新的版本。</p>
@@ -41,7 +41,7 @@
 </ol>
 <p>优先考虑降低vertica版本，然而官网上对于Community版本只提供了最新版的下载接口，Enterprise版本倒提供了多种历史版本。</p>
 <p>咨询安装过vertiva的同学，从他们那里拷了可以安装在Centos 7.2版本上的vertica 7.2安装包，按照上述安装过程重新进行安装。然而到版本检测这一环节又提示（如下图所示），所使用的vertica RPM包不是最新版本，必须先进行升级。</p>
-<p><img src="/home/zixing/Pictures/vertica_err1_2.png" alt="vertica版本与系统版本不符2"></p>
+<p><img src="../images/vertica_err1_2.png" alt="vertica版本与系统版本不符2"></p>
 <p>到目前真是没辙了，只能升级系统版本了。等待运维的小伙伴升级系统……</p>
 </div><script type="text/javascript" src="/js/share.js?v=0.0.0" async></script><a data-url="http://yoursite.com/2017/04/20/vertica安装过程中的版本问题/" data-id="cj1qftl940000kndbsrldxlqj" class="article-share-link">分享到</a><div class="tags"><a href="/tags/vertica/">vertica</a></div><div class="post-nav"><a href="/2017/04/19/essay_20170419/" class="pre">世事洞明皆学问，人情练达即文章</a></div><div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div><script>var cloudTieConfig = {
   url: document.location.href,
